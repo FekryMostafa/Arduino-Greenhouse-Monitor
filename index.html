@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Greenhouse Monitor</title>
+  <style>
+    /* Light Theme Variables */
+    :root {
+      --background-color: #f0f0f0;
+      --overlay-color: rgba(238, 238, 238, 0.8);
+      --container-bg: #ffffff;
+      --text-color: #333333;
+      --status-disconnected: #f44336;
+      --status-connected: #4CAF50;
+      --button-bg: #4CAF50;
+      --button-hover: #45a049;
+      --button-text: #ffffff;
+      --toggle-bg: #008CBA;
+      --toggle-hover: #007B9E;
+      --description-color: #000000;
+      --icon-color: #ffffff;
+    }
+
+    /* Dark Theme Variables */
+    [data-theme="dark"] {
+      --background-color: #121212;
+      --overlay-color: rgba(0, 0, 0, 0.7);
+      --container-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --status-disconnected: #f44336;
+      --status-connected: #4CAF50;
+      --button-bg: #bb86fc;
+      --button-hover: #985eff;
+      --button-text: #121212;
+      --toggle-bg: #03dac6;
+      --toggle-hover: #018786;
+      --icon-color: #ffffff;
+      --description-color: #ffffff;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('image.png');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      position: relative;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .overlay {
+      background-color: var(--overlay-color);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      transition: background-color 0.3s;
+    }
+
+    .container {
+      background-color: var(--container-bg);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      min-width: 300px;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    /* Removed the original h1 to avoid redundancy */
+
+    /* New Title Style */
+    h1.status-title {
+      color: var(--text-color);
+      margin-bottom: 10px;
+      font-size: 3em; /* Matches the original status size */
+    }
+
+    .reading {
+      font-size: 2em;
+      margin: 20px 0;
+    }
+
+    .reading span {
+      font-weight: bold;
+    }
+
+    #connectButton {
+      background-color: var(--button-bg);
+      padding: 10px 20px;
+      font-size: 1em;
+      color: var(--button-text);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+      margin-top: 10px;
+    }
+
+    #connectButton.connected {
+      background-color: #f44336;
+    }
+
+    #connectButton:hover {
+      background-color: var(--button-hover);
+    }
+
+    #unitToggle {
+      margin-top: 20px;
+      padding: 8px 16px;
+      font-size: 1em;
+      background-color: var(--toggle-bg);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #unitToggle:hover {
+      background-color: var(--toggle-hover);
+    }
+
+    .unit {
+      font-weight: bold;
+    }
+
+    /* Adjusted Status Style */
+    #status {
+      margin-bottom: 16px;
+      color: var(--status-disconnected);
+      font-weight: bolder;
+      font-size: 2em; /* Reduced from 3em to make it a subtitle */
+      text-align: center;
+      -webkit-text-stroke: 1px #000000;
+      transition: color 0.3s, font-size 0.3s;
+    }
+
+    #status.connected {
+      color: var(--status-connected);
+    }
+
+    #description {
+      margin-bottom: 32px;
+      color: var(--description-color);
+      font-size: 1.2em;
+      text-align: center;
+      max-width: 600px;
+      padding: 0 20px;
+      transition: color 0.3s;
+    }
+
+    #themeToggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: var(--toggle-bg);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, transform 0.5s;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    #themeToggle:hover {
+      background-color: var(--toggle-hover);
+    }
+
+    .icon {
+      width: 24px;
+      height: 24px;
+      fill: var(--icon-color);
+      transition: transform 0.5s;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <!-- Dark Mode Toggle Button with Icon -->
+  <button id="themeToggle" aria-label="Toggle Dark Mode">
+    <!-- Sun Icon -->
+    <svg id="sunIcon" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M6.995 12c0 2.761 2.246 5.005 5.005 5.005s5.005-2.244 5.005-5.005c0-2.758-2.246-5.005-5.005-5.005s-5.005 2.247-5.005 5.005zm13.707-1h-2.121l-1.414-1.414 1.414-1.414 2.121 2.121-1.414 1.414zm-16.97 0l-2.121-1.414 1.414-1.414 2.121 2.121-1.414 1.414zm1.414 9.192l-1.414-1.414 1.414-1.414 2.121 2.121-1.414 1.414zm14.142 0l2.121-1.414-1.414-1.414-2.121 2.121 1.414 1.414zM12 4.5V2h-1v2.5h1zm0 15V22h-1v-2.5h1zm8.5-7h2.5v-1h-2.5v1zm-15 0h-2.5v-1h2.5v1z"/>
+    </svg>
+    <!-- Moon Icon -->
+    <svg id="moonIcon" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: none;">
+      <path d="M21.75 15a9 9 0 01-14.65 6.778 9 9 0 006.778-14.65 7 7 0 1010.872 10.872A8.956 8.956 0 0121.75 15z"/>
+    </svg>
+  </button>
+
+  <!-- New Title Above Status -->
+  <h1 class="status-title">Greenhouse Monitor</h1>
+  
+  <div id="status">Status: Disconnected</div>
+
+  <div id="description">
+    The <strong>Greenhouse Monitor</strong> app connects to your Arduino device to provide real-time monitoring of environmental conditions within your greenhouse. Track temperature and light intensity to ensure optimal growth conditions for your plants.
+  </div>
+
+  <div class="container">
+    <!-- Removed the original h1 to prevent duplication -->
+    <div class="reading">Temperature: <span id="temperature">--</span> <span class="unit" id="tempUnit">°C</span></div>
+    <div class="reading">Light Intensity: <span id="light">--</span>%</div>
+    <button id="connectButton">Connect to Arduino</button>
+    <button id="unitToggle">Switch to °F</button>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+
+    const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+    // Apply saved theme or default to dark theme
+    const currentTheme = localStorage.getItem("theme");
+    if (currentTheme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      sunIcon.style.display = "none";
+      moonIcon.style.display = "block";
+    } else if (currentTheme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+      sunIcon.style.display = "block";
+      moonIcon.style.display = "none";
+    } else if (prefersDarkScheme.matches) {
+      document.documentElement.setAttribute("data-theme", "dark");
+      sunIcon.style.display = "none";
+      moonIcon.style.display = "block";
+    } else {
+      // Default to dark theme instead of light
+      document.documentElement.setAttribute("data-theme", "dark");
+      sunIcon.style.display = "none";
+      moonIcon.style.display = "block";
+    }
+
+    // Toggle theme on button click
+    themeToggle.addEventListener("click", function() {
+      let theme = document.documentElement.getAttribute("data-theme");
+      if (theme === "dark") {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+        sunIcon.style.display = "block";
+        moonIcon.style.display = "none";
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        localStorage.setItem("theme", "dark");
+        sunIcon.style.display = "none";
+        moonIcon.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
