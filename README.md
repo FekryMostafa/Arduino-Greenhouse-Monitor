@@ -128,7 +128,7 @@ Connect the components as shown in the diagram below:
    - Click the **"Connect to Arduino"** button on the web page.
    - Select the appropriate serial port from the prompt.
      - **Windows**: `COM3`, `COM4`, etc.
-     - **macOS**: `/dev/tty.usbmodemXXXX`
+     - **macOS**: `/dev/cu.usbmodemXXXX`
 
 4. **View Real-Time Data**:
 
