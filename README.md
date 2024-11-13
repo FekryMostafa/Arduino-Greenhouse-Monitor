@@ -12,9 +12,6 @@ The **Greenhouse Monitor** is a web-based application that connects to an Arduin
   - [Software Setup](#software-setup)
 - [Usage](#usage)
 - [Customization](#customization)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
 
 ## Features
 
